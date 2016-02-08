@@ -1,0 +1,65 @@
+<html>
+<head></head>
+<body>
+
+<div id="oj-captcha-container"></div>
+
+
+
+<script>  
+ 
+	window.INIT_CONST = {
+		JSLIBSPATH : "/dist",
+		JSCOREPATH : "/dist"
+	}
+	
+	window.ojInit = function(){ 
+	
+		var assetsQueue,
+		readyCallback, 
+		
+		init = function(assets_arr, cb){
+			assetsQueue = assets_arr;
+			readyCallback = cb;
+			loadNext();
+		},
+		
+		loadNext = function(){
+			loadAsset(assetsQueue[0], "js", assetComplete)
+		},
+	
+		
+		assetComplete = function(){
+			assetsQueue.shift();
+			if(!checkReady()) loadNext();
+			else readyCallback();
+		},
+		
+		loadAsset = function(path, type, cb){
+			console.log("Load : " + path);
+			var script = document.createElement("script")
+			script.type = "text/javascript";
+			script.onload = cb;
+			script.src = path;
+			document.getElementsByTagName("head")[0].appendChild(script);
+		},
+		
+		checkReady = function(){
+			if(assetsQueue.length) return false;
+			return true;
+		}
+		
+		return {
+			init : init
+		}
+	}();
+	
+	//window.ojInit.init([window.INIT_CONST.JSLIBSPATH + "/libs.js", window.INIT_CONST.JSCOREPATH +"/core.js"], function(){
+	window.ojInit.init(["libs.js", "base.js", "core.js"], function(){
+		//start the CAPTCHA 
+		console.log("start captcha");
+	});
+
+</script>
+</body>
+</html>
