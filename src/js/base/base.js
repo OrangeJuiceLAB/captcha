@@ -1,3 +1,5 @@
+
+
 class OJBase {
   
   constructor(){
@@ -6,8 +8,9 @@ class OJBase {
   
 }
 
-class Point {
+class Point extends OJBase {
 	constructor(x,y){
+		super();
 		this._x = x;
 		this._y = y;
 	}
@@ -59,14 +62,43 @@ class OJCaptchaContainer extends OJCaptchaBase {
   }
   
   init(gamesArr){
+	  
+	
     this._gamesQueue = gamesArr;
-    this.start();
+	
+	this.loadAssets()
+		.then(this.start.bind(this));
   }
+  
+  loadAssets(){
+	  //get spritesheets from game classes
+	  let spriteSheets =  _.without(_.map(this._gamesQueue, g => g.prototype.SPRITE_SHEET_PATH), null);
+
+	  //load single spritesheet image
+	  let loadSpriteSheet = (spriteSheet) => {
+		return new Promise((resolve, reject) => {
+			let img = new Image();
+			img.onload = resolve;
+			img.src = spriteSheet;
+		}); 
+	  }
+	  
+	  //recursive closure that loads all spreadsheets in queue
+	  let loader = function(resolve, reject){
+		if(!spriteSheets.length) return resolve();
+		loadSpriteSheet(spriteSheets.shift()).then( () => loader(resolve,reject));
+	  }
+	  
+	  return new Promise(loader);
+  }
+  
+  
   
   build(){
     this.isBuild = true;
     this.$canvas = $("<canvas width='400' height='400'></canvas>");
 	this.$canvas.mousemove(this.mousemove.bind(this));
+	this.$canvas.click(this.canvasclick.bind(this));
     this.ctx = this.$canvas[0].getContext("2d");
     this._$src.append(this.$canvas); 
   }
@@ -81,6 +113,10 @@ class OJCaptchaContainer extends OJCaptchaBase {
   tick(timeStamp){
     this.activeGame.tick(this.ctx, timeStamp - this._startTime);
     window.requestAnimationFrame(this.tick.bind(this));
+  }
+  
+  canvasclick(evt){
+	if(this.activeGame) this.activeGame.click(evt.offsetX, evt.offsetY);  
   }
   
   mousemove(evt){
@@ -106,6 +142,10 @@ class OJCaptchaMicroGameBase extends OJCaptchaBase {
   
   tick(ctx, ms){
     
+  }
+  
+  click(x,y){
+	 
   }
   
   mouseMove(x,y){

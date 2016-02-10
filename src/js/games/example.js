@@ -6,8 +6,8 @@ class OJCaptchaMicroGame_example extends OJCaptchaMicroGameBase {
   }
   
   tick(ctx, ms){
-    super.tick(ctx, ms);
-	
+    super.tick(ctx, ms); 
+		
 	ctx.fillStyle = 'black';
 	
     ctx.fillRect(0,0,400,400);
@@ -34,7 +34,12 @@ class OJCaptchaMicroGame_example extends OJCaptchaMicroGameBase {
 	ctx.stroke();
   }
   
+  click(x,y){
+	
+  }
 } 
+
+OJCaptchaMicroGame_example.prototype.SPRITE_SHEET_PATH = "https://s3-us-west-2.amazonaws.com/s.cdpn.io/t-265/explosion17.png";
  
 var container = new OJCaptchaContainer($("#oj-captcha-container"));
 container.init([OJCaptchaMicroGame_example]); 
