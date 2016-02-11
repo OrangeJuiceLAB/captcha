@@ -30,6 +30,10 @@ class Point extends OJBase {
 	set y(to){
 		this._y = to;
 	}
+	
+	clone(){
+		return new Point(this.x, this.y);
+	}
 }
 
 class OJCaptchaBase extends OJBase {
@@ -42,6 +46,7 @@ class OJCaptchaContainer extends OJCaptchaBase {
   constructor($src){
     super();
     this._$src = $src;
+	this.imageAssets = [];
   }
   
   get $src(){
@@ -55,7 +60,7 @@ class OJCaptchaContainer extends OJCaptchaBase {
 	  this._activeSeed = _.times(16, _.random(0,9)).join("");
 	  
 	  //start the active game
-      this._activeGame = new this._gamesQueue[0](this._activeSeed);
+      this._activeGame = new this._gamesQueue[0](this._activeSeed, this.imageAssets);
     }
     
     return this._activeGame;
@@ -63,7 +68,6 @@ class OJCaptchaContainer extends OJCaptchaBase {
   
   init(gamesArr){
 	  
-	
     this._gamesQueue = gamesArr;
 	
 	this.loadAssets()
@@ -71,28 +75,37 @@ class OJCaptchaContainer extends OJCaptchaBase {
   }
   
   loadAssets(){
+	  
 	  //get spritesheets from game classes
-	  let spriteSheets =  _.without(_.map(this._gamesQueue, g => g.prototype.SPRITE_SHEET_PATH), null);
+	   _.forEach(this._gamesQueue, (g) => {
+		  let url = g.prototype.SPRITE_SHEET_PATH;
+		  if(url && !(url in this.imageAssets)){
+			  this.imageAssets.push({ url , image : new Image()});
+		  }
+	  }, this);
 
 	  //load single spritesheet image
 	  let loadSpriteSheet = (spriteSheet) => {
 		return new Promise((resolve, reject) => {
-			let img = new Image();
-			img.onload = resolve;
-			img.src = spriteSheet;
-		}); 
+			spriteSheet.image.onload = () => {
+				spriteSheet.complete = true;
+				spriteSheet.width = spriteSheet.image.naturalWidth;
+				spriteSheet.height = spriteSheet.image.naturalHeight;
+				resolve();
+			}
+			spriteSheet.image.src = spriteSheet.url;
+		});
 	  }
 	  
-	  //recursive closure that loads all spreadsheets in queue
+	  //recursive closure that loads all spreadsheets from queue
 	  let loader = function(resolve, reject){
-		if(!spriteSheets.length) return resolve();
-		loadSpriteSheet(spriteSheets.shift()).then( () => loader(resolve,reject));
-	  }
+		let next = _.find(this.imageAssets, a => !a.complete);
+		if(!next) return resolve();
+		loadSpriteSheet(next).then( () => loader(resolve,reject));
+	  }.bind(this);
 	  
 	  return new Promise(loader);
   }
-  
-  
   
   build(){
     this.isBuild = true;
@@ -127,9 +140,11 @@ class OJCaptchaContainer extends OJCaptchaBase {
 
 class OJCaptchaMicroGameBase extends OJCaptchaBase {
 	
-  constructor(randomSeed){
+  constructor(randomSeed, assets){
     super();
     this._randomSeed = randomSeed;
+	this._assets = assets;
+	this._frames = {};
   }
   
   get randomSeed(){
@@ -148,12 +163,27 @@ class OJCaptchaMicroGameBase extends OJCaptchaBase {
 	 
   }
   
+  getAsset(name){
+	return _.find(this._assets, a => a.url == name);
+  }
+  
+  drawFromSpriteFrame(ctx, name, numFramesW, numFramesH, frameIndex, targetX, targetY, targetW, targetH){
+	let asset = this.getAsset(name),
+		frameW = asset.width / numFramesW,
+		frameH = asset.height / numFramesH,
+		frameY = Math.floor(frameIndex / numFramesW),
+		frameX = frameIndex - (frameY * numFramesW);
+		
+	ctx.drawImage(asset.image, frameX * frameW, frameY * frameH, frameW, frameH, targetX, targetY, targetW, targetH);
+  }
+  
   mouseMove(x,y){
 	this._lastMouse = new Point(x,y);
   }
   
   get lastMouse() {
-	  return this._lastMouse;
+	  if(!this._lastMouse) return null;
+	  return this._lastMouse.clone();
   }
   
 }

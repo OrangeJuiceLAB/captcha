@@ -1,8 +1,14 @@
 class OJCaptchaMicroGame_example extends OJCaptchaMicroGameBase { 
   
-  constructor(randomSeed){
-    super(randomSeed);
+  constructor(randomSeed, assets){
+    super(randomSeed, assets);
 	this.fadeInButtons = true;
+  }
+  
+  getNextexplosionFrame(){
+	 if(this._explosionFrame === undefined) this._explosionFrame = -1;
+	 this._explosionFrame = (++this._explosionFrame)%(5*5);
+	 return this._explosionFrame;
   }
   
   tick(ctx, ms){
@@ -11,29 +17,25 @@ class OJCaptchaMicroGame_example extends OJCaptchaMicroGameBase {
 	ctx.fillStyle = 'black';
 	
     ctx.fillRect(0,0,400,400);
+		
+	var center = this.lastMouse || new Point(200,200);
+	if(!center) center = new Point(200)
 	
-	if(this.fadeInButtons){
-		this.drawButtons(ctx, Math.min(ms/5000, 1));
-	}
+	center.x -= 50;
+	center.y -= 50;
+	
+	this.drawFromSpriteFrame(
+		ctx, 
+		OJCaptchaMicroGame_example.prototype.SPRITE_SHEET_PATH,
+		5,
+		5,
+		this.getNextexplosionFrame(), 
+		center.x, 
+		center.y,
+		100,
+		100);
   }
-  
-  getButtonCenter (){
-	var lastMouse = this.lastMouse;
-	if(!lastMouse) return new Point(200,200);
-	return lastMouse;
-  }
-  
-  drawButtons (ctx, pct){
-	var center = this.getButtonCenter();
-	ctx.beginPath();
-	ctx.arc(center.x, center.y, 50, 0, 2 * Math.PI, false);
-	ctx.fillStyle = this.rgba(0, 128, 0, pct);
-	ctx.fill();
-	ctx.lineWidth = 5;
-	ctx.strokeStyle = this.rgba(0, 255, 0, pct);
-	ctx.stroke();
-  }
-  
+    
   click(x,y){
 	
   }
