@@ -16,6 +16,14 @@ class OJCaptchaMicroGame_game1 extends OJCaptchaMicroGameBase {
 	  this._timerProgress = to;
   }
   
+  get gameSuccessProgress(){
+	  return this._gameSuccessProgress|| 0;
+  }
+  
+  set gameSuccessProgress(to){
+	  this._gameSuccessProgress = to;
+  }
+  
   get robotStartTopLeft(){
 	  
 	if(!this._robotStartTopLeft){
@@ -29,23 +37,25 @@ class OJCaptchaMicroGame_game1 extends OJCaptchaMicroGameBase {
 			Math.floor(xMin + (xLen * (Number(this.randomSeed.charAt(2)/10)))),
 			Math.floor(yMin + (yLen * (Number(this.randomSeed.charAt(4)/10))))
 			);
-	} 
-	
+	}
+			
 	return this._robotStartTopLeft.clone();
   }
   
-  get robotTopLeft(){
+  getRobotTopLeft(at) {
+	if(at === undefined) at = this.timerProgress;
+	
 	let start = this.robotStartTopLeft,
-		targetY = -300,
+		targetY = -300, 
 		yLen = targetY - start.y; 
 	
-	start.y += (yLen * (this.timerProgress*this.timerProgress));
+	start.y += (yLen * (at*at));
 	
 	return start;
   }
   
   get balloonRect(){
-	var r = this.robotTopLeft;
+	var r = this.getRobotTopLeft();
 	return new Rect(r.x + 40, r.y, 50,65);
   }
   
@@ -55,10 +65,10 @@ class OJCaptchaMicroGame_game1 extends OJCaptchaMicroGameBase {
 	  return s;
   }
   
-  cloudPositions (){
+  cloudPositions (atPct){
 	  var x1 = -50;
 	  var y1 = -500;
-	  var yDistance = window.CONST.canvasHeight * this.timerProgress;
+	  var yDistance = window.CONST.canvasHeight * atPct;
 	  
 	  return [ 
 			new Point(x1, y1 + yDistance),
@@ -72,69 +82,116 @@ class OJCaptchaMicroGame_game1 extends OJCaptchaMicroGameBase {
 	  ]
   }
   
-  tick(ctx, ms){
-    super.tick(ctx, ms); 
-	
-	this.timerProgress = ms / this.maxDuration;
+	tick(ctx, ms){
+		super.tick(ctx, ms); 
 		
-	//sky
-	var grd=ctx.createLinearGradient(0,0,0,400);
-	grd.addColorStop(0,"#5db1ff");
-	grd.addColorStop(1,"#bcddff");
-	ctx.fillStyle=grd;
-    ctx.fillRect(0,0,400,400);
+		this.timerProgress = ms / this.maxDuration;
+			
+		//sky
+		var grd=ctx.createLinearGradient(0,0,0,400);
+		grd.addColorStop(0,"#5db1ff");
+		grd.addColorStop(1,"#bcddff");
+		ctx.fillStyle=grd;
+		ctx.fillRect(0,0,400,400);
+			
+		if(this.isComplete) this.drawComplete(ctx);
+		else this.draw(ctx);
+	} 
+	
+	draw(ctx){
 		
-	//clouds
-	var clouds = this.cloudPositions();
-	
-	var cloud = new Rect(197,84,195,105)
-	
-	clouds.forEach(function(p){			
+		//clouds
+		var clouds = this.cloudPositions(this.timerProgress);
+		
+		var cloud = new Rect(197,84,195,105)
+			
+		clouds.forEach(function(p){			
+			this.drawFromSpriteSheet(
+				ctx, 
+				OJCaptchaMicroGame_game1.prototype.SPRITE_SHEET_PATH,
+				cloud,
+				new Rect(p.x,p.y, cloud.width, cloud.height)
+			);	
+		}.bind(this));
+		
+		  
 		this.drawFromSpriteSheet(
 			ctx, 
 			OJCaptchaMicroGame_game1.prototype.SPRITE_SHEET_PATH,
-			cloud,
-			new Rect(p.x,p.y, cloud.width, cloud.height)
-		);	
-	}.bind(this));
-	
+			new Rect(0,0,190,400),
+			new Rect(this.getRobotTopLeft().x,this.getRobotTopLeft().y,190,400)
+		);
+		
+		var key = new Rect(189,13,45,40);
+		
+		if(this.keyState === 1) {
+			key.x += key.width;
+			key.width = 41;
+		} else if(this.keyState === 2){
+			key.x = 273;
+			key.width = 39
+		}
+		
+		var drawKey = new Rect(65 - key.width, 280 - key.height,key.width, key.height).offset(this.getRobotTopLeft())
+		  
+		this.drawFromSpriteSheet(
+			ctx, 
+			OJCaptchaMicroGame_game1.prototype.SPRITE_SHEET_PATH,
+			key,
+			drawKey
+		);
+		
+	  } 
 	  
-	this.drawFromSpriteSheet(
-		ctx, 
-		OJCaptchaMicroGame_game1.prototype.SPRITE_SHEET_PATH,
-		new Rect(0,0,190,400),
-		new Rect(this.robotTopLeft.x,this.robotTopLeft.y,190,400)
-	);
-	
-	var key = new Rect(189,13,45,40);
-	
-	if(this.keyState === 1) {
-		key.x += key.width;
-		key.width = 41;
-	} else if(this.keyState === 2){
-		key.x = 273;
-		key.width = 39
+	  drawComplete(ctx){
+		//clouds
+			
+		++this._tickSinceComplete;
+		
+		var cloudState =  this._completeAt - (this._tickSinceComplete/400);
+		console.log("complete: " + cloudState);
+		
+		var clouds = this.cloudPositions(Math.max(-100,cloudState)); 
+		
+		var cloud = new Rect(197,84,195,105)
+			  
+		clouds.forEach(function(p){			
+			this.drawFromSpriteSheet(
+				ctx, 
+				OJCaptchaMicroGame_game1.prototype.SPRITE_SHEET_PATH,
+				cloud,
+				new Rect(p.x,p.y, cloud.width, cloud.height)
+			);	
+		}.bind(this));
+		
+		//robot
+		this.drawFromSpriteSheet(
+			ctx, 
+			OJCaptchaMicroGame_game1.prototype.SPRITE_SHEET_PATH,
+			new Rect(393,0,231,228),
+			new Rect(this.getRobotTopLeft(cloudState).x,this.getRobotTopLeft(cloudState).y,231,228)
+		);
+		
+	 } 
+  
+	complete (){
+		this._isComplete = true;
+		this._completeAt = this.timerProgress;
+		this._tickSinceComplete =0;
+	}
+ 
+	get isComplete(){
+		return this._isComplete;
 	}
 	
-	var drawKey = new Rect(65 - key.width, 280 - key.height,key.width, key.height).offset(this.robotTopLeft)
-	  
-	this.drawFromSpriteSheet(
-		ctx, 
-		OJCaptchaMicroGame_game1.prototype.SPRITE_SHEET_PATH,
-		key,
-		drawKey
-	);
-	
-	
-	
-  } 
     
   click(x,y){
 	//did we click inside the ballon?  
 	if(this.balloonRect.contains(new Point(x,y))){
 		//hit
 		console.log("hit"); 
-  
+		this.complete();
+		this.solve({x,y, progress : this.timerProgress});
 	} else {
 		//miss
 		console.log("miss");

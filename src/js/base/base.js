@@ -110,7 +110,7 @@ class OJCaptchaContainer extends OJCaptchaBase {
     if(!this._activeGame){
 		
 	  //create a 16 char randomSeed
-	  this._activeSeed = _.times(16, _.random(0,9)).join("");
+	  this._activeSeed = _.times(16, () => _.random(0,9)).join("");
 	  
 	  //start the active game
       this._activeGame = new this._gamesQueue[0](this._activeSeed, this.imageAssets);
@@ -216,6 +216,10 @@ class OJCaptchaMicroGameBase extends OJCaptchaBase {
   
   click(x,y){
 	 
+  }
+  
+  solve(){
+	  
   }
   
   getAsset(name){
