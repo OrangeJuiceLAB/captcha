@@ -43,5 +43,7 @@ class OJCaptchaMicroGame_example extends OJCaptchaMicroGameBase {
 
 OJCaptchaMicroGame_example.prototype.SPRITE_SHEET_PATH = "https://s3-us-west-2.amazonaws.com/s.cdpn.io/t-265/explosion17.png";
  
+ /*
 var container = new OJCaptchaContainer($("#oj-captcha-container"));
 container.init([OJCaptchaMicroGame_example]); 
+*/
