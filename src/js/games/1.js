@@ -28,8 +28,8 @@ class OJCaptchaMicroGame_game1 extends OJCaptchaMicroGameBase {
 	  
 	if(!this._robotStartTopLeft){
 
-		let xMin = 0, xMax = window.CONST.canvasWidth - 200,
-			yMin = window.CONST.canvasHeight  *.3, yMax = window.CONST.canvasHeight*0.6,
+		let xMin = 0, xMax = window.CONST.CANVAS_WIDTH - 200,
+			yMin = window.CONST.CANVAS_HEIGHT  *.3, yMax = window.CONST.CANVAS_HEIGHT*0.6,
 			xLen = xMax - xMin,
 			yLen = yMax - yMin;
 
@@ -68,7 +68,7 @@ class OJCaptchaMicroGame_game1 extends OJCaptchaMicroGameBase {
   cloudPositions (atPct){
 	  var x1 = -50;
 	  var y1 = -500;
-	  var yDistance = window.CONST.canvasHeight * atPct;
+	  var yDistance = window.CONST.CANVAS_HEIGHT * atPct;
 	  
 	  return [ 
 			new Point(x1, y1 + yDistance),
@@ -78,7 +78,6 @@ class OJCaptchaMicroGame_game1 extends OJCaptchaMicroGameBase {
 			new Point(x1+ 300, y1 + 100 + yDistance),
 			new Point(x1+ 240, y1 + 400 + yDistance),
 			new Point(x1+ 300, y1 + 700 + yDistance),
-			
 	  ]
   }
   
@@ -199,8 +198,8 @@ class OJCaptchaMicroGame_game1 extends OJCaptchaMicroGameBase {
   }
 } 
 
-
+/*
 OJCaptchaMicroGame_game1.prototype.SPRITE_SHEET_PATH = "https://s3-us-west-2.amazonaws.com/s.cdpn.io/t-265/spritesheet1.png";
  
 var container = new OJCaptchaContainer($("#oj-captcha-container"));
-container.init([OJCaptchaMicroGame_game1]); 
+container.init([OJCaptchaMicroGame_game1]); */

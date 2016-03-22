@@ -9,8 +9,8 @@ class OJBase {
 }
 
 window.CONST = {
-	canvasWidth : 400,
-	canvasHeight : 400
+	CANVAS_WIDTH : 400, 
+	CANVAS_HEIGHT: 400
 }
 
 class Point extends OJBase {
@@ -38,6 +38,11 @@ class Point extends OJBase {
 	
 	set y(to){
 		this._y = to;
+	}
+	
+	interpolate(to, frac) 
+	{
+		return new Point(this.x+(to.x-this.x)*frac, this.y+(to.y-this.y)*frac);
 	}
 	
 	offset(x,y){

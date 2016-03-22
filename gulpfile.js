@@ -5,6 +5,7 @@ const concat = require('gulp-concat');
 const replace = require('gulp-replace');
 const watch = require('gulp-watch');
 const insert = require('gulp-insert');
+const chalk = require("chalk");
  
 const paths = {
 	src : "src",
@@ -43,7 +44,20 @@ gulp.task('coreJS', () => {
 		.pipe(sourcemaps.init())
 			.pipe(babel({
 				presets: ['es2015']
-			}))
+			}).on('error', (err) => {
+				console.log(
+				  chalk.red(
+					err.fileName +
+					(
+						err.loc ?
+						'(' + err.loc.line + ',' + err.loc.column + '): ' :
+						': '
+					)
+				  ) +
+				  'error Babel: ' + err.message + '\n' +
+				  err.codeFrame
+				);
+		  }))
 		.pipe(concat('core.js'))
 		.pipe(sourcemaps.write())
 		.pipe(gulp.dest(paths.dist));
