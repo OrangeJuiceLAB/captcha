@@ -56,6 +56,10 @@ class Point extends OJBase {
 		return this;
 	}
 	
+	distanceTo(p2){
+		return Math.sqrt( Math.pow((this.x-p2.x), 2) + Math.pow((this.y-p2.y), 2) );
+	}
+	
 	clone(){
 		return new Point(this.x, this.y);
 	}
@@ -170,6 +174,8 @@ class OJCaptchaContainer extends OJCaptchaBase {
     this.isBuild = true;
     this.$canvas = $("<canvas width='400' height='400'></canvas>");
 	this.$canvas.mousemove(this.mousemove.bind(this));
+	this.$canvas.mousedown(this.mousedown.bind(this));
+	this.$canvas.mouseup(this.mouseup.bind(this));
 	this.$canvas.click(this.canvasclick.bind(this));
     this.ctx = this.$canvas[0].getContext("2d");
     this._$src.append(this.$canvas); 
@@ -194,6 +200,14 @@ class OJCaptchaContainer extends OJCaptchaBase {
   
   mousemove(evt){
 	if(this.activeGame) this.activeGame.mouseMove(evt.offsetX, evt.offsetY);
+  }
+  
+  mousedown(evt){
+	if(this.activeGame) this.activeGame.mousedown(evt.offsetX, evt.offsetY);
+  }
+  
+  mouseup(evt){
+	if(this.activeGame) this.activeGame.mouseup(evt.offsetX, evt.offsetY);
   }
   
 }
@@ -245,6 +259,14 @@ class OJCaptchaMicroGameBase extends OJCaptchaBase {
 	  let asset = this.getAsset(name);
 	  ctx.drawImage(asset.image, srcRect.x, srcRect.y, srcRect.width, srcRect.height, targetRect.x, targetRect.y, targetRect.width, targetRect.height);
 	  return this;
+  }
+  
+  mousedown(x,y){
+	  
+  }
+  
+  mouseup(x,y){
+	  
   }
   
   mouseMove(x,y){
