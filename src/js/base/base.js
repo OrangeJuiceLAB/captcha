@@ -1,5 +1,3 @@
-
-
 class OJBase {
   
   constructor(){
@@ -60,6 +58,13 @@ class Point extends OJBase {
 		return Math.sqrt( Math.pow((this.x-p2.x), 2) + Math.pow((this.y-p2.y), 2) );
 	}
 	
+	angularDistance(angle, distance){
+		return new Point(
+			this.x + Math.cos(angle) * distance,
+			this.y + Math.sin(angle) * distance
+		);
+	}
+	
 	clone(){
 		return new Point(this.x, this.y);
 	}
@@ -88,6 +93,13 @@ class Rect extends Point {
 		this._height = to;
 	}
 	
+	get right(){
+		return this.x + this.width;
+	}
+	
+	get bottom(){
+		return this.y + this.height;
+	}
 	
 	contains(p){		
 		return (p.x >= this.x && p.x <= this.x + this.width && p.y >= this.y && p.y <= this.y + this.height);
